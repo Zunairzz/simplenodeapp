@@ -16,12 +16,21 @@ const userRoutes = require('./routes/userRoutes'); // Ensure correct path
 const projectRoutes = require('./routes/projectRoutes');
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to my Node.js app!' });
+    res.json({message: 'Welcome to my Node.js app!'});
 });
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/project', projectRoutes);
+// // Routes
+// app.use('/api/users', userRoutes);
+// app.use('/api/project', projectRoutes);
+
+const authController = require('/controllers/authController');
+const {REGISTER_URL, LOGIN_URL, GET_ALL_USER_URL, DELETE_USER_URL} = require("/util/Constants");
+
+app.post(REGISTER_URL, authController.register);
+app.post(LOGIN_URL, authController.login);
+app.get(GET_ALL_USER_URL, authController.getProfiles);
+app.delete(DELETE_USER_URL, authController.deleteUser);
+
 
 // Connect MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
