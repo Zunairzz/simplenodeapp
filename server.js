@@ -9,7 +9,15 @@ dotenv.config();
 // Middleware
 app.use(cors());
 app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.urlencoded({extended: true})); // Parse URL-encoded bodies
+
+// Routes
+const userRoutes = require('./routes/userRoutes'); // Ensure correct path
+const projectRoutes = require('./routes/projectRoutes');
+
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/project', projectRoutes);
 
 // Connect MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
@@ -30,7 +38,7 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something went wrong!');
 });
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3022;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 module.exports = app;
