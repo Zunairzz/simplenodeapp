@@ -59,12 +59,12 @@ const authController = {
             const user = await User.findByIdAndDelete(userId);
 
             if (!user) {
-                return res.status(404).json({ message: 'User not found' });
+                return res.status(404).json({message: 'User not found'});
             }
 
-            res.json({ message: 'User deleted successfully' });
+            res.json({message: 'User deleted successfully'});
         } catch (err) {
-            res.status(500).json({ message: 'Server error' });
+            res.status(500).json({message: 'Server error'});
         }
     }
 }
