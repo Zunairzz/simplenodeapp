@@ -15,6 +15,10 @@ app.use(express.urlencoded({extended: true})); // Parse URL-encoded bodies
 const userRoutes = require('./routes/userRoutes'); // Ensure correct path
 const projectRoutes = require('./routes/projectRoutes');
 
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to my Node.js app!' });
+});
+
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/project', projectRoutes);
