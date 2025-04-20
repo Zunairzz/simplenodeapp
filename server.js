@@ -11,25 +11,25 @@ app.use(cors());
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({extended: true})); // Parse URL-encoded bodies
 
+const {register, login, getProfiles, deleteUser} = require('/controllers/authController');
 // Routes
 const userRoutes = require('./routes/userRoutes'); // Ensure correct path
+
 const projectRoutes = require('./routes/projectRoutes');
 
 app.get('/', (req, res) => {
     res.json({message: 'Welcome to my Node.js app!'});
 });
-
 // // Routes
 // app.use('/api/users', userRoutes);
-// app.use('/api/project', projectRoutes);
 
-const authController = require('/controllers/authController');
+// app.use('/api/project', projectRoutes);
 const {REGISTER_URL, LOGIN_URL, GET_ALL_USER_URL, DELETE_USER_URL} = require("/util/Constants");
 
-app.post(REGISTER_URL, authController.register);
-app.post(LOGIN_URL, authController.login);
-app.get(GET_ALL_USER_URL, authController.getProfiles);
-app.delete(DELETE_USER_URL, authController.deleteUser);
+app.post(REGISTER_URL, register);
+app.post(LOGIN_URL, login);
+app.get(GET_ALL_USER_URL, getProfiles);
+app.delete(DELETE_USER_URL, deleteUser);
 
 
 // Connect MongoDB Atlas
