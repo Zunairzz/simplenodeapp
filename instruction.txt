@@ -1,0 +1,37 @@
+
+**Features:**
+- Secure password hashing with bcrypt
+- JWT authentication
+- MongoDB Atlas integration
+- Input validation
+- Error handling
+- Protected routes
+- Clean code structure following MVC pattern
+
+**Security Measures:**
+- Password hashing
+- JWT token verification
+- Input sanitization
+- Error handling
+- Environment variables for sensitive data
+
+**To Run:**
+1. Complete MongoDB Atlas setup
+2. Install dependencies
+3. Create .env file
+4. Run `npm start`
+
+**Testing:**
+- Use Postman or curl to test APIs
+- Register a user
+- Login to get token
+- Use token to access protected profile route
+
+**Notes:**
+- Replace MongoDB connection string in .env
+- Generate a secure JWT_SECRET
+- Consider adding rate limiting for production
+- Add input validation middleware for more robust security
+- Consider adding refresh tokens for better token management
+
+This setup provides a solid foundation for a secure authentication system that you can build upon based on your needs.
