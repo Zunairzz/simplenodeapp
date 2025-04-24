@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userDataSchema = mongoose.Schema({
+const resumeSchema = mongoose.Schema({
     name: {type: String, required: [true, 'Please provide a name']},
     title: {type: String, required: [true, 'Please provide a title']},
     phoneNo: {type: String, required: [true, 'Please provide a phone number']},
@@ -12,4 +12,4 @@ const userDataSchema = mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('UserData', userDataSchema);
+module.exports = mongoose.model('ResumeData', resumeSchema);
