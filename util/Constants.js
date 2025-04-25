@@ -9,6 +9,7 @@ const Constants = {
     DELETE_PROJECT_URL: '/:id',
     GET_PROJECT_BY_ID_URL: '/:id',
     UPDATE_PROJECT_BY_ID_URL: '/update-project/:id',
+    ADD_RESUME_URL: '/resume',
     GET_RESUME_DATA_URL: '/resumes',
     GET_RESUME_DATA_BY_ID_URL: '/resume/:id',
     UPDATE_RESUME_DATA_URL: '/update-resume/:id',

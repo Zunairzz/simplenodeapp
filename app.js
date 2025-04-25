@@ -6,6 +6,7 @@ const app = express();
 
 const userRoutes = require('./routes/userRoutes'); // Ensure correct path
 const projectRoutes = require('./routes/projectRoutes'); // Ensure correct path
+const resumeReoutes = require('./routes/resumeRoutes'); // Ensure correct path
 
 dotenv.config();
 
@@ -29,6 +30,11 @@ app.use('/api/project', (req, res, next) => {
     console.log(`[${new Date().toISOString()}] /api/project route accessed`);
     next();
 }, projectRoutes);
+
+app.use('/api', (req, res, next) => {
+    console.log(`[${new Date().toISOString()}] /api/project route accessed`);
+    next();
+}, resumeReoutes);
 
 console.log('Routes have been set up.');
 
