@@ -1,7 +1,10 @@
 const ResumeData = require("../models/Resume"); // Assuming the schema file is named ResumeData.js
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
+const {CloudinaryStorage} = require('multer-storage-cloudinary');
 const dotenv = require('dotenv');
+const multer = require("multer");
+const path = require('path');
 dotenv.config();
 
 // Configure Cloudinary with credentials from environment variables
@@ -10,6 +13,39 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+// Set storage engine
+const storage = multer.diskStorage({
+    destination: './uploads', // Folder where PDFs will be stored
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Initialize upload
+const upload = multer({
+    storage: storage,
+    limits: {fileSize: 10 * 1024 * 1024}, // 10 MB limit
+    fileFilter: function (req, file, cb) {
+        checkFileType(file, cb);
+    }
+}).single('pdf');
+
+// Check file type
+function checkFileType(file, cb) {
+    // Allowed ext
+    const filetypes = /pdf/;
+    // Check ext
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb('Error: Only PDFs allowed!');
+    }
+}
 
 // Resume controller object containing CRUD operations
 const resumeController = {
@@ -76,13 +112,13 @@ const resumeController = {
     // Create a new resume
     async createResume(req, res) {
         try {
-            const {name, title, phoneNo, email, experience} = req.body;
+            const {name, title, phoneNo, email, experience, resume} = req.body;
 
             // Validate required fields
-            if (!name || !title || !phoneNo || !email || !experience || !req.file) {
+            if (!name || !title || !phoneNo || !email || !experience || !resume.url, !resume.publicId) {
                 return res.status(400).json({
                     success: false,
-                    message: 'All fields are required including resume file'
+                    message: 'All fields are required including resume file',
                 });
             }
 
@@ -91,7 +127,7 @@ const resumeController = {
             if (!emailRegex.test(email)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Invalid email format'
+                    message: 'Invalid email format',
                 });
             }
 
@@ -100,15 +136,9 @@ const resumeController = {
             if (!phoneRegex.test(phoneNo)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Invalid phone number format'
+                    message: 'Invalid phone number format',
                 });
             }
-
-            // Upload resume to Cloudinary
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'resumes',
-                resource_type: 'raw'
-            });
 
             // Create new resume document
             const newResume = await ResumeData.create({
@@ -118,22 +148,22 @@ const resumeController = {
                 email,
                 experience,
                 resume: {
-                    url: result.secure_url,
-                    publicId: result.public_id
-                }
+                    url: resume.url,
+                    publicId: resume.publicId,
+                },
             });
 
             res.status(201).json({
                 success: true,
                 message: 'Resume created successfully',
-                data: newResume
+                data: newResume,
             });
         } catch (error) {
             console.error('Error creating resume:', error);
             res.status(500).json({
                 success: false,
                 message: 'Server error while creating resume',
-                error: error.message
+                error: error.message,
             });
         }
     },
@@ -248,6 +278,42 @@ const resumeController = {
                 message: 'Server error while deleting resume',
                 error: error.message
             });
+        }
+    },
+    async uploadPdf(req, res) {
+        if (!req.file) {
+            return res.status(400).json({error: 'No file uploaded'});
+        }
+
+        res.status(200).json({
+            message: 'PDF uploaded successfully',
+            url: req.file.path,         // Cloudinary URL
+            public_id: req.file.filename // IMPORTANT: Cloudinary public_id
+        });
+    },
+
+    async updatePdf(req, res) {
+        const {old_public_id} = req.body;
+
+        if (!old_public_id) {
+            return res.status(400).json({error: 'old_public_id is required!'});
+        }
+
+        try {
+            // First, delete the old file
+            await cloudinary.uploader.destroy(old_public_id, {resource_type: 'raw'});
+
+            // New file is already uploaded by multer (multer-storage-cloudinary uploads automatically)
+
+            res.status(200).json({
+                message: 'PDF updated successfully!',
+                url: req.file.path,         // new Cloudinary URL
+                public_id: req.file.filename // new public_id
+            });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({error: 'Failed to update PDF', details: error.message});
         }
     }
 };

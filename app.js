@@ -32,7 +32,7 @@ app.use('/api/project', (req, res, next) => {
 }, projectRoutes);
 
 app.use('/api', (req, res, next) => {
-    console.log(`[${new Date().toISOString()}] /api/project route accessed`);
+    console.log(`[${new Date().toISOString()}] /api/resume route accessed`);
     next();
 }, resumeReoutes);
 
