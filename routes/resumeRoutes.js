@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const {v2: cloudinary} = require('cloudinary');
-const {CloudinaryStorage} = require('multer-storage-cloudinary');
 const {
     ADD_RESUME_URL,
     GET_RESUME_DATA_URL,
