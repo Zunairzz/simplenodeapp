@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const multer = require('multer');
 const {v2: cloudinary} = require('cloudinary');
 const {CloudinaryStorage} = require('multer-storage-cloudinary');
 const {
@@ -19,28 +18,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Configure storage
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'pdfs', // Folder name in Cloudinary
-        resource_type: 'raw', // Important! For non-image files like PDF
-        format: async (req, file) => 'pdf', // Always save as pdf
-        public_id: (req, file) => file.originalname.split('.')[0] // Use original filename without extension
-    },
-});
-
-// Multer middleware
-const upload = multer({storage: storage});
-
 
 router.post(ADD_RESUME_URL, resumeController.createResume);
 router.get(GET_RESUME_DATA_URL, resumeController.getAllResumes);
 router.get(GET_RESUME_DATA_BY_ID_URL, resumeController.getResumeById);
 router.put(UPDATE_RESUME_DATA_URL, resumeController.updateResumeById);
 router.delete(DELETE_RESUME_DATA_BY_ID_URL, resumeController.deleteResumeById);
-router.post('/uploads', upload.single('pdf'), resumeController.uploadPdf);
-router.put('/update-pdf', upload.single('pdf'), resumeController.updatePdf);
+router.post('/uploads', resumeController.uploadPdf);
+router.put('/update-pdf', resumeController.updatePdf);
 
 module.exports = router;
 

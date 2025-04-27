@@ -1,10 +1,7 @@
 const ResumeData = require("../models/Resume"); // Assuming the schema file is named ResumeData.js
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
-const {CloudinaryStorage} = require('multer-storage-cloudinary');
 const dotenv = require('dotenv');
-const multer = require("multer");
-const path = require('path');
 dotenv.config();
 
 // Configure Cloudinary with credentials from environment variables
@@ -13,39 +10,6 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: './uploads', // Folder where PDFs will be stored
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-// Initialize upload
-const upload = multer({
-    storage: storage,
-    limits: {fileSize: 10 * 1024 * 1024}, // 10 MB limit
-    fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
-    }
-}).single('pdf');
-
-// Check file type
-function checkFileType(file, cb) {
-    // Allowed ext
-    const filetypes = /pdf/;
-    // Check ext
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    // Check mime
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Only PDFs allowed!');
-    }
-}
 
 // Resume controller object containing CRUD operations
 const resumeController = {
