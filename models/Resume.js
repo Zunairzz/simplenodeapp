@@ -6,9 +6,13 @@ const resumeSchema = mongoose.Schema({
     phoneNo: {type: String, required: [true, 'Please provide a phone number']},
     email: {type: String, required: [true, 'Please provide an email']},
     experience: {type: String, required: [true, 'Please provide experience']},
-    resume: {
-        url: {type: String, required: true},
-        publicId: {type: String, required: true},
+    document: {
+        url: { type: String },
+        publicId: { type: String },
+    },
+    image: {
+        url: { type: String },
+        publicId: { type: String },
     },
 });
 

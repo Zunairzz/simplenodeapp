@@ -14,6 +14,7 @@ const Constants = {
     GET_RESUME_DATA_BY_ID_URL: '/resume/:id',
     UPDATE_RESUME_DATA_URL: '/update-resume/:id',
     DELETE_RESUME_DATA_BY_ID_URL: '/delete-resume/:id',
+    DELETE_RESUME_RESOURCES: '/delete-resources',
 }
 
 module.exports = Constants;

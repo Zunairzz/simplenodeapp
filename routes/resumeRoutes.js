@@ -6,7 +6,8 @@ const {
     GET_RESUME_DATA_URL,
     GET_RESUME_DATA_BY_ID_URL,
     UPDATE_RESUME_DATA_URL,
-    DELETE_RESUME_DATA_BY_ID_URL
+    DELETE_RESUME_DATA_BY_ID_URL,
+    DELETE_RESUME_RESOURCES
 } = require('../util/Constants');
 const resumeController = require("../controllers/resumeController");
 
@@ -25,6 +26,7 @@ router.put(UPDATE_RESUME_DATA_URL, resumeController.updateResumeById);
 router.delete(DELETE_RESUME_DATA_BY_ID_URL, resumeController.deleteResumeById);
 router.post('/uploads', resumeController.uploadPdf);
 router.put('/update-pdf', resumeController.updatePdf);
+router.delete(DELETE_RESUME_RESOURCES, resumeController.deleteResources)
 
 module.exports = router;
 

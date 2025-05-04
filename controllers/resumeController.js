@@ -1,5 +1,6 @@
 const ResumeData = require("../models/Resume"); // Assuming the schema file is named ResumeData.js
 const mongoose = require('mongoose');
+const validator = require('validator');
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
 dotenv.config();
@@ -18,9 +19,10 @@ const resumeController = {
         try {
             const resumes = await ResumeData.find();
             if (!resumes.length) {
-                return res.status(404).json({
+                return res.status(200).json({
                     success: false,
-                    message: 'No resumes found'
+                    message: 'No resumes found',
+                    data: resumes
                 });
             }
             res.status(200).json({
@@ -76,46 +78,110 @@ const resumeController = {
     // Create a new resume
     async createResume(req, res) {
         try {
-            const {name, title, phoneNo, email, experience, resume} = req.body;
+            const {name, title, phoneNo, email, experience, document, image} = req.body;
 
             // Validate required fields
-            if (!name || !title || !phoneNo || !email || !experience || !resume.url, !resume.publicId) {
+            const missingFields = [];
+            if (!name) missingFields.push('name');
+            if (!title) missingFields.push('title');
+            if (!phoneNo) missingFields.push('phoneNo');
+            if (!email) missingFields.push('email');
+            if (!experience) missingFields.push('experience');
+
+            if (missingFields.length > 0) {
                 return res.status(400).json({
                     success: false,
-                    message: 'All fields are required including resume file',
+                    message: `Missing required fields: ${missingFields.join(', ')}`,
                 });
             }
 
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            // Validate input formats
+            if (!validator.isLength(name.trim(), {min: 2, max: 100})) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Invalid email format',
+                    message: 'Name must be between 2 and 100 characters',
                 });
             }
-
-            // Validate phone number format (basic example, adjust as needed)
-            const phoneRegex = /^\+?[\d\s-]{10,}$/;
-            if (!phoneRegex.test(phoneNo)) {
+            if (!validator.isLength(title.trim(), {min: 2, max: 100})) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Title must be between 2 and 100 characters',
+                });
+            }
+            if (!validator.isMobilePhone(phoneNo.trim(), 'any', {strictMode: true})) {
                 return res.status(400).json({
                     success: false,
                     message: 'Invalid phone number format',
                 });
             }
+            if (!validator.isEmail(email.trim())) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid email format',
+                });
+            }
+            if (!validator.isLength(experience.trim(), {min: 10, max: 5000})) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Experience must be between 10 and 5000 characters',
+                });
+            }
 
-            // Create new resume document
-            const newResume = await ResumeData.create({
-                name,
-                title,
-                phoneNo,
-                email,
-                experience,
-                resume: {
-                    url: resume.url,
-                    publicId: resume.publicId,
-                },
-            });
+            // Validate document if provided
+            if (document) {
+                if (!document.url || !validator.isURL(document.url.trim())) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Invalid document URL',
+                    });
+                }
+                if (!document.publicId) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Document publicId is required if document is provided',
+                    });
+                }
+            }
+
+            // Validate image if provided
+            if (image) {
+                if (!image.url || !validator.isURL(image.url.trim())) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Invalid image URL',
+                    });
+                }
+                if (!image.publicId) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Image publicId is required if image is provided',
+                    });
+                }
+            }
+
+            // Sanitize inputs to prevent XSS
+            const sanitizedData = {
+                name: validator.escape(name.trim()),
+                title: validator.escape(title.trim()),
+                phoneNo: validator.escape(phoneNo.trim()),
+                email: validator.normalizeEmail(email.trim()),
+                experience: validator.escape(experience.trim()),
+                ...(document && {
+                    document: {
+                        url: document.url.trim(),
+                        publicId: document.publicId.trim(),
+                    },
+                }),
+                ...(image && {
+                    image: {
+                        url: image.url.trim(),
+                        publicId: image.publicId.trim(),
+                    },
+                }),
+            };
+
+            // Create a new resume document
+            const newResume = await ResumeData.create(sanitizedData);
 
             res.status(201).json({
                 success: true,
@@ -224,9 +290,14 @@ const resumeController = {
                 });
             }
 
-            // Delete resume file from Cloudinary
-            if (resume.resume.publicId) {
-                await cloudinary.uploader.destroy(resume.resume.publicId);
+            // Delete a resume file from Cloudinary if it exists
+            if (resume.document && resume.document.publicId) {
+                await cloudinary.uploader.destroy(resume.document.publicId);
+            }
+
+            // Delete an image file from Cloudinary if it exists
+            if (resume.image && resume.image.publicId) {
+                await cloudinary.uploader.destroy(resume.image.publicId);
             }
 
             await ResumeData.findByIdAndDelete(id);
@@ -278,6 +349,44 @@ const resumeController = {
         } catch (error) {
             console.error(error);
             res.status(500).json({error: 'Failed to update PDF', details: error.message});
+        }
+    },
+
+    async deleteResources(req, res) {
+        try {
+            const {publicId} = req.body;
+
+            console.log(publicId);
+            // Validate publicId
+            if (!publicId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Public ID is required'
+                });
+            }
+
+            // Delete image or document from Cloudinary
+            const result = await cloudinary.uploader.destroy(publicId);
+
+            if (result.result !== 'ok') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Resource not found in Cloudinary'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Resource deleted successfully',
+                data: result
+            });
+        } catch (error) {
+            console.error('Error deleting resource from Cloudinary:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Server error while deleting image',
+                error: error.message
+            });
         }
     }
 };
