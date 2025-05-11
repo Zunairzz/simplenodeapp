@@ -9,7 +9,7 @@ const findSolutionController = {
     async addProblem(req, res) {
         console.log('Add problem request received');
         try {
-            const { question, answer } = req.body;
+            const {question, answer, githubUrl} = req.body;
 
             // Validate input fields
             if (!question || !answer) {
@@ -19,8 +19,8 @@ const findSolutionController = {
                 });
             }
 
-            // Create and save new problem
-            const problem = new FindSolution({ question, answer });
+            // Create and save a new problem
+            const problem = new FindSolution({question, answer, githubUrl});
             await problem.save();
 
             // Return success response
@@ -44,7 +44,7 @@ const findSolutionController = {
     async getProblem(req, res) {
         console.log('Get problem request received');
         try {
-            const { id } = req.params;
+            const {id} = req.params;
 
             // Validate ID format
             if (!mongoose.isValidObjectId(id)) {
@@ -106,8 +106,8 @@ const findSolutionController = {
     async updateProblem(req, res) {
         console.log('Update problem request received');
         try {
-            const { id } = req.params;
-            const { question, answer } = req.body;
+            const {id} = req.params;
+            const {question, answer, githubUrl} = req.body;
 
             // Validate ID format
             if (!mongoose.isValidObjectId(id)) {
@@ -128,8 +128,8 @@ const findSolutionController = {
             // Update problem
             const problem = await FindSolution.findByIdAndUpdate(
                 id,
-                { question, answer },
-                { new: true, runValidators: true }
+                {question, answer, githubUrl},
+                {new: true, runValidators: true}
             );
 
             if (!problem) {
@@ -160,7 +160,7 @@ const findSolutionController = {
     async deleteProblem(req, res) {
         console.log('Delete problem request received');
         try {
-            const { id } = req.params;
+            const {id} = req.params;
 
             // Validate ID format
             if (!mongoose.isValidObjectId(id)) {
