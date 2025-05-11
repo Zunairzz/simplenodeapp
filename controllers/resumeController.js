@@ -2,6 +2,7 @@ const ResumeData = require("../models/Resume"); // Assuming the schema file is n
 const mongoose = require('mongoose');
 const validator = require('validator');
 const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -316,15 +317,31 @@ const resumeController = {
         }
     },
     async uploadPdf(req, res) {
-        if (!req.file) {
-            return res.status(400).json({error: 'No file uploaded'});
-        }
+        try {
+            const filePath = req.file.path;
 
-        res.status(200).json({
-            message: 'PDF uploaded successfully',
-            url: req.file.path,         // Cloudinary URL
-            public_id: req.file.filename // IMPORTANT: Cloudinary public_id
-        });
+            // Upload to Cloudinary
+            const result = await cloudinary.uploader.upload(filePath, {
+                resource_type: 'raw', // use 'raw' for PDF/doc files
+                folder: 'resumes'
+            });
+
+            // Remove a local file
+            fs.unlinkSync(filePath);
+
+            return res.json({
+                success: true,
+                url: result.secure_url,
+                public_id: result.public_id
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: 'Upload failed',
+                error: error.message
+            });
+        }
     },
 
     async updatePdf(req, res) {

@@ -1,14 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const {v2: cloudinary} = require('cloudinary');
-const {
-    ADD_RESUME_URL,
-    GET_RESUME_DATA_URL,
-    GET_RESUME_DATA_BY_ID_URL,
-    UPDATE_RESUME_DATA_URL,
-    DELETE_RESUME_DATA_BY_ID_URL,
-    DELETE_RESUME_RESOURCES
-} = require('../util/Constants');
+const {ENDPOINTS} = require('../util/Constants');
 const resumeController = require("../controllers/resumeController");
 
 // Configure Cloudinary with credentials from environment variables
@@ -18,15 +13,21 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Multer setup
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({storage});
 
-router.post(ADD_RESUME_URL, resumeController.createResume);
-router.get(GET_RESUME_DATA_URL, resumeController.getAllResumes);
-router.get(GET_RESUME_DATA_BY_ID_URL, resumeController.getResumeById);
-router.put(UPDATE_RESUME_DATA_URL, resumeController.updateResumeById);
-router.delete(DELETE_RESUME_DATA_BY_ID_URL, resumeController.deleteResumeById);
-router.post('/uploads', resumeController.uploadPdf);
+router.post(ENDPOINTS.RESUME.ADD, resumeController.createResume);
+router.get(ENDPOINTS.RESUME.GET_ALL, resumeController.getAllResumes);
+router.get(ENDPOINTS.RESUME.GET_BY_ID, resumeController.getResumeById);
+router.put(ENDPOINTS.RESUME.UPDATE, resumeController.updateResumeById);
+router.delete(ENDPOINTS.RESUME.DELETE, resumeController.deleteResumeById);
+router.post('/uploads', upload.single('resume'), resumeController.uploadPdf);
 router.put('/update-pdf', resumeController.updatePdf);
-router.delete(DELETE_RESUME_RESOURCES, resumeController.deleteResources)
+router.delete(ENDPOINTS.RESUME.DELETE_RESOURCES, resumeController.deleteResources)
 
 module.exports = router;
 
