@@ -17,21 +17,11 @@ app.get('/', (req, res) => {
 });
 
 // Connect MongoDB Atlas (MongoDB connection)
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/myapp', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('MongoDB connected successfully');
-    } catch (error) {
-        console.error('MongoDB connection failed:', error);
-        process.exit(1);
-    }
-};
 
-// Connect to database
-connectDB();
+// Connect MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log('MongoDB Connection Error:', err));
 
 // Serve static files in non-production
 // if (process.env.NODE_ENV === 'PRODUCTION') {
