@@ -23,22 +23,22 @@ app.use(express.json());
 console.log('Express JSON parser middleware configured.');
 
 // Routes
-app.use(BASE_URLS.USER, (req, res, next) => {
+app.use('/api/users', (req, res, next) => {
     console.log(`[${new Date().toISOString()}] /api/users route accessed`);
     next();
 }, userRoutes);
 
-app.use(BASE_URLS.PROJECT, (req, res, next) => {
+app.use('/api/project', (req, res, next) => {
     console.log(`[${new Date().toISOString()}] /api/project route accessed`);
     next();
 }, projectRoutes);
 
-app.use(BASE_URLS.RESUME, (req, res, next) => {
+app.use('/api/resume', (req, res, next) => {
     console.log(`[${new Date().toISOString()}] /api/resume route accessed`);
     next();
 }, resumeRoutes);
 
-app.use(BASE_URLS.PROBLEM, (req, res, next) => {
+app.use('/api/problem', (req, res, next) => {
     console.log(`[${new Date().toISOString()}] /api/problem route accessed`);
     next();
 }, problemsRoutes);
