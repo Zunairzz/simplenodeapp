@@ -2,9 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
-import {Constants} from "../util/Constants.js";
-
-const {ENDPOINTS} = Constants;
+const {ENDPOINTS} = require('../util/Constants');
 
 router.post(ENDPOINTS.USER.REGISTER, authController.register);
 router.post(ENDPOINTS.USER.LOGIN, authController.login);

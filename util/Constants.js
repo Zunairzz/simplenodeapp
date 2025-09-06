@@ -1,4 +1,4 @@
-export const Constants = {
+const Constants = {
     // Base URLs
     BASE_URLS: {
         USER: '/api/users',
@@ -53,3 +53,5 @@ export const Constants = {
         return url;
     }
 };
+
+module.exports = Constants;

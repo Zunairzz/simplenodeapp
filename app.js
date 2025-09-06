@@ -3,9 +3,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const {urlencoded} = require('body-parser');
 const app = express();
-import {Constants} from "./util/Constants.js";
 
-const {BASE_URLS, PROBLEM_BASE_URL, RESUME_BASE_URL, PROJECT_BASE_URL} = Constants;
+const {BASE_URLS} = require('./util/Constants');
 
 const userRoutes = require('./routes/userRoutes'); // Ensure correct path
 const projectRoutes = require('./routes/projectRoutes'); // Ensure correct path
